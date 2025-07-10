@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import giftRoutes from "./routes/gift.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import externalLinkRoutes from "./routes/externalLink.routes.js";
+import adminRoutes from "./routes/admin.routes.js";
 
 dotenv.config();
 const app = express();
@@ -22,9 +23,6 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/gifts", giftRoutes);
 app.use("/api/links", externalLinkRoutes);
-
-app.get("/api/test", (req, res) => {
-  res.json({ message: "Backend funcionando!" });
-});
+app.use("/api/admin", adminRoutes);
 
 export default app;
