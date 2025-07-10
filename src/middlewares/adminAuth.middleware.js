@@ -1,9 +1,12 @@
-import jwt from "jsonwebtoken";
-import axios from "axios";
-import WhitelistedUser from "../models/WhitelistedUser.js";
+import { jwtVerify, createRemoteJWKSet } from "jose";
+
+const JWKS = createRemoteJWKSet(
+  new URL("https://precise-redbird-90.clerk.accounts.dev/.well-known/jwks.json")
+);
 
 export const verifyAdmin = async (req, res, next) => {
   const authHeader = req.headers.authorization;
+
   if (!authHeader?.startsWith("Bearer ")) {
     return res.status(401).json({ message: "Token não fornecido" });
   }
@@ -11,28 +14,18 @@ export const verifyAdmin = async (req, res, next) => {
   const token = authHeader.split(" ")[1];
 
   try {
-    // Verifica token no Clerk (pode mudar conforme o provider)
-    const response = await axios.get("https://api.clerk.dev/v1/tokens/verify", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+    const { payload } = await jwtVerify(token, JWKS, {
+      issuer: "https://precise-redbird-90.clerk.accounts.dev",
     });
 
-    const userEmail = response.data?.email_address;
-    if (!userEmail) {
-      return res.status(401).json({ message: "Email não encontrado no token" });
+    if (payload.public_metadata?.role !== "admin") {
+      return res.status(403).json({ message: "Acesso negado: não é admin" });
     }
 
-    const isWhitelisted = await WhitelistedUser.findOne({ email: userEmail });
-    if (!isWhitelisted) {
-      return res.status(403).json({ message: "Acesso restrito ao painel" });
-    }
-
-    req.userEmail = userEmail; // opcional, caso precise depois
+    req.adminEmail = payload.email;
     next();
   } catch (err) {
-    return res
-      .status(403)
-      .json({ message: "Token inválido ou erro de verificação" });
+    console.error("Erro na verificação do token:", err);
+    return res.status(403).json({ message: "Token inválido ou acesso negado" });
   }
 };
