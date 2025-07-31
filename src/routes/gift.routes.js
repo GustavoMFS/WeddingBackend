@@ -1,4 +1,3 @@
-// src/routes/gift.routes.js
 import express from "express";
 import {
   createGift,
@@ -8,14 +7,14 @@ import {
   deleteGift,
   addGiftMessage,
 } from "../controllers/gift.controller.js";
-import { verifyGuest } from "../middlewares/auth.middleware.js";
+import { verifyUser } from "../middlewares/auth.middleware.js";
 import { verifyAdmin } from "../middlewares/adminAuth.middleware.js";
 
 const router = express.Router();
 
 // Convidados
-router.get("/", verifyGuest, getAllGifts);
-router.post("/:id/messages", verifyGuest, addGiftMessage);
+router.get("/", verifyUser, getAllGifts);
+router.post("/:id/messages", verifyUser, addGiftMessage);
 
 // Noivos (admin)
 router.post("/", verifyAdmin, createGift);

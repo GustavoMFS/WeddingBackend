@@ -6,13 +6,13 @@ import {
   updateExternalLink,
   deleteExternalLink,
 } from "../controllers/externalLink.controller.js";
-import { verifyGuest } from "../middlewares/auth.middleware.js";
+import { verifyUser } from "../middlewares/auth.middleware.js";
 import { verifyAdmin } from "../middlewares/adminAuth.middleware.js";
 
 const router = express.Router();
 
 // Convidados
-router.get("/", verifyGuest, getAllExternalLinks);
+router.get("/", verifyUser, getAllExternalLinks);
 
 // Noivos (admin)
 router.post("/", verifyAdmin, createExternalLink);
