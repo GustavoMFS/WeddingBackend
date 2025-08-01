@@ -1,6 +1,6 @@
 import Gift from "../models/Gift.js";
+import stripe from "../config/stripe.js";
 
-// Criar um presente
 export const createGift = async (req, res) => {
   try {
     const gift = new Gift(req.body);
@@ -11,7 +11,6 @@ export const createGift = async (req, res) => {
   }
 };
 
-// Listar todos os presentes ativos
 export const getAllGifts = async (req, res) => {
   try {
     const gifts = await Gift.find({ active: true });
@@ -21,7 +20,6 @@ export const getAllGifts = async (req, res) => {
   }
 };
 
-// Buscar um presente pelo ID
 export const getGiftById = async (req, res) => {
   try {
     const gift = await Gift.findById(req.params.id);
@@ -33,7 +31,6 @@ export const getGiftById = async (req, res) => {
   }
 };
 
-// Atualizar presente
 export const updateGift = async (req, res) => {
   try {
     const gift = await Gift.findByIdAndUpdate(req.params.id, req.body, {
@@ -47,7 +44,6 @@ export const updateGift = async (req, res) => {
   }
 };
 
-// Deletar presente
 export const deleteGift = async (req, res) => {
   try {
     const gift = await Gift.findByIdAndDelete(req.params.id);
@@ -59,16 +55,13 @@ export const deleteGift = async (req, res) => {
   }
 };
 
-// Adicionar mensagem ao presente
 export const addGiftMessage = async (req, res) => {
   const { name, message, value } = req.body;
 
   if (!name || !message || value == null) {
-    return res
-      .status(400)
-      .json({
-        message: "Todos os campos são obrigatórios: name, message, value",
-      });
+    return res.status(400).json({
+      message: "Todos os campos são obrigatórios: name, message, value",
+    });
   }
 
   try {
@@ -76,13 +69,10 @@ export const addGiftMessage = async (req, res) => {
     if (!gift)
       return res.status(404).json({ message: "Presente não encontrado" });
 
-    // Adiciona mensagem
     gift.messages.push({ name, message, value });
 
-    // Atualiza valor arrecadado
     gift.amountCollected += value;
 
-    // Se ativou o disableOnGoalReached e atingiu valor, desativa presente
     if (gift.disableOnGoalReached && gift.amountCollected >= gift.value) {
       gift.active = false;
     }
@@ -92,5 +82,63 @@ export const addGiftMessage = async (req, res) => {
     res.status(201).json(gift);
   } catch (err) {
     res.status(500).json({ message: err.message });
+  }
+};
+
+export const createCheckoutSession = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, message, value } = req.body;
+
+    if (!name || !message || value == null) {
+      return res.status(400).json({ message: "Campos obrigatórios faltando" });
+    }
+
+    const gift = await Gift.findById(id);
+    if (!gift)
+      return res.status(404).json({ message: "Presente não encontrado" });
+
+    if (value <= 0) {
+      return res.status(400).json({ message: "Valor deve ser maior que zero" });
+    }
+
+    if (
+      gift.disableOnGoalReached &&
+      gift.amountCollected + value > gift.value
+    ) {
+      return res
+        .status(400)
+        .json({ message: "Valor excede valor do presente" });
+    }
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      mode: "payment",
+      line_items: [
+        {
+          price_data: {
+            currency: "brl",
+            product_data: {
+              name: gift.title,
+              description: gift.description,
+              images: gift.image ? [gift.image] : undefined,
+            },
+            unit_amount: Math.round(value * 100), // centavos
+          },
+          quantity: 1,
+        },
+      ],
+      success_url: `${
+        process.env.FRONTEND_URL
+      }/presentes/success?session_id={CHECKOUT_SESSION_ID}&giftId=${id}&name=${encodeURIComponent(
+        name
+      )}&message=${encodeURIComponent(message)}&value=${value}`,
+      cancel_url: `${process.env.FRONTEND_URL}/presentes/${id}`,
+    });
+
+    res.json({ url: session.url });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Erro ao criar sessão Stripe" });
   }
 };
