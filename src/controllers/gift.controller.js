@@ -71,12 +71,6 @@ export const addGiftMessage = async (req, res) => {
 
     gift.messages.push({ name, message, value });
 
-    gift.amountCollected += value;
-
-    if (gift.disableOnGoalReached && gift.amountCollected >= gift.value) {
-      gift.active = false;
-    }
-
     await gift.save();
 
     res.status(201).json(gift);
@@ -102,15 +96,6 @@ export const createCheckoutSession = async (req, res) => {
       return res.status(400).json({ message: "Valor deve ser maior que zero" });
     }
 
-    if (
-      gift.disableOnGoalReached &&
-      gift.amountCollected + value > gift.value
-    ) {
-      return res
-        .status(400)
-        .json({ message: "Valor excede valor do presente" });
-    }
-
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       mode: "payment",
@@ -123,7 +108,7 @@ export const createCheckoutSession = async (req, res) => {
               description: gift.description,
               images: gift.image ? [gift.image] : undefined,
             },
-            unit_amount: Math.round(value * 100), // centavos
+            unit_amount: Math.round(value * 100),
           },
           quantity: 1,
         },

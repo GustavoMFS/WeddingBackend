@@ -11,8 +11,6 @@ const GiftSchema = new mongoose.Schema(
       enum: ["full", "partial"],
       default: "full",
     },
-    disableOnGoalReached: { type: Boolean, default: false },
-    amountCollected: { type: Number, default: 0 },
     active: { type: Boolean, default: true },
     messages: [
       {
