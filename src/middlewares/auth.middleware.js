@@ -4,9 +4,10 @@ import { jwtVerify, createRemoteJWKSet } from "jose";
 
 dotenv.config();
 
-const JWKS = createRemoteJWKSet(
-  new URL("https://precise-redbird-90.clerk.accounts.dev/.well-known/jwks.json")
-);
+const JWKS_URL = process.env.CLERK_JWKS_URL;
+const CLERK_ISSUER = process.env.CLERK_ISSUER;
+
+const JWKS = createRemoteJWKSet(new URL(JWKS_URL));
 
 export const verifyUser = async (req, res, next) => {
   const authHeader = req.headers.authorization;
@@ -27,7 +28,7 @@ export const verifyUser = async (req, res, next) => {
 
   try {
     const { payload } = await jwtVerify(token, JWKS, {
-      issuer: "https://precise-redbird-90.clerk.accounts.dev",
+      issuer: CLERK_ISSUER,
     });
 
     if (payload.public_metadata?.role === "admin") {
