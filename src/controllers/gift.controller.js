@@ -105,7 +105,10 @@ export const createCheckoutSession = async (req, res) => {
             currency: "brl",
             product_data: {
               name: gift.title,
-              description: gift.description,
+              description:
+                gift.description && gift.description.trim() !== ""
+                  ? gift.description
+                  : undefined,
               images: gift.image ? [gift.image] : undefined,
             },
             unit_amount: Math.round(value * 100),
@@ -125,5 +128,6 @@ export const createCheckoutSession = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Erro ao criar sessão Stripe" });
+    console.log({ message: err.message, stack: err.stack });
   }
 };
