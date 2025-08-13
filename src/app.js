@@ -5,6 +5,8 @@ import giftRoutes from "./routes/gift.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import externalLinkRoutes from "./routes/externalLink.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
+import pixRoutes from "./routes/pix.routes.js";
+import stripeRoutes from "./routes/stripe.routes.js";
 
 dotenv.config();
 const app = express();
@@ -18,11 +20,14 @@ app.use(
   })
 );
 
+app.use("/api/stripe", stripeRoutes);
+
 app.use(express.json());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/gifts", giftRoutes);
 app.use("/api/links", externalLinkRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/pix", pixRoutes);
 
 export default app;

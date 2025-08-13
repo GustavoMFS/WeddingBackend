@@ -116,11 +116,13 @@ export const createCheckoutSession = async (req, res) => {
           quantity: 1,
         },
       ],
-      success_url: `${
-        process.env.FRONTEND_URL
-      }/presentes/success?session_id={CHECKOUT_SESSION_ID}&giftId=${id}&name=${encodeURIComponent(
-        name
-      )}&message=${encodeURIComponent(message)}&value=${value}`,
+      metadata: {
+        giftId: id,
+        name,
+        message,
+        value: value.toString(),
+      },
+      success_url: `${process.env.FRONTEND_URL}/presentes/success`,
       cancel_url: `${process.env.FRONTEND_URL}/presentes/${id}`,
     });
 
