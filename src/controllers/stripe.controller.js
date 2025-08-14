@@ -28,7 +28,9 @@ export const stripeWebhook = async (req, res) => {
 
       const gift = await Gift.findById(giftId);
 
-      if (gift) {
+      if (!gift) {
+        console.warn("Presente não encontrado:", giftId);
+      } else {
         await GiftPurchase.create({
           giftId: gift._id,
           giftTitle: gift.title,
@@ -37,12 +39,13 @@ export const stripeWebhook = async (req, res) => {
           value,
         });
 
-        console.log("✅ Presente recebido registrado:", giftId);
-      } else {
-        console.warn("⚠️ Presente não encontrado para ID:", giftId);
+        gift.amountCollected = (gift.amountCollected || 0) + value;
+        await gift.save();
+
+        console.log(`Compra registrada para o presente ${giftId}`);
       }
     } catch (err) {
-      console.error("❌ Erro ao salvar compra do presente:", err);
+      console.error("Erro ao salvar compra do presente:", err);
     }
   }
 
