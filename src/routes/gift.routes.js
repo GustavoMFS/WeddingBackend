@@ -16,7 +16,7 @@ const router = express.Router();
 router.get("/", verifyUser, getAllGifts);
 router.post("/:id/messages", verifyUser, addGiftMessage);
 
-// Nova rota para Stripe
+//rota para Stripe
 router.post("/:id/create-checkout-session", verifyUser, createCheckoutSession);
 
 // Admin routes
