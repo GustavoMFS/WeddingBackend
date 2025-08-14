@@ -25,6 +25,7 @@ export const stripeWebhook = async (req, res) => {
       const name = session.metadata.name;
       const message = session.metadata.message;
       const value = parseFloat(session.metadata.value);
+      const email = session.customer_details?.email;
 
       const gift = await Gift.findById(giftId);
 
@@ -37,6 +38,7 @@ export const stripeWebhook = async (req, res) => {
           name,
           message,
           value,
+          email,
         });
 
         gift.amountCollected = (gift.amountCollected || 0) + value;

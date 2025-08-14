@@ -11,6 +11,7 @@ const GiftPurchaseSchema = new mongoose.Schema(
     name: { type: String, required: true },
     message: { type: String, required: true },
     value: { type: Number, required: true },
+    email: { type: String, required: true },
     createdAt: { type: Date, default: Date.now },
   },
   { timestamps: true }
