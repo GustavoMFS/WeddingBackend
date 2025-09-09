@@ -5,7 +5,6 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const router = express.Router();
-
 const VALID_PASSWORD = process.env.GUEST_PASSWORD;
 
 router.post("/login", (req, res) => {
@@ -17,7 +16,7 @@ router.post("/login", (req, res) => {
   }
 
   const token = jwt.sign({ role: "guest" }, process.env.JWT_SECRET, {
-    expiresIn: "7d",
+    expiresIn: "2d",
   });
 
   res.json({ token });
