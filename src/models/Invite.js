@@ -6,6 +6,8 @@ const InviteSchema = new mongoose.Schema(
     email: { type: String },
     phone: { type: String },
     pin: { type: String, required: true },
+    confirmed: { type: Boolean, default: null },
+    confirmedAt: { type: Date },
   },
   { timestamps: true }
 );

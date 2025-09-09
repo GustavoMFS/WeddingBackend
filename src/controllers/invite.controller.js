@@ -103,7 +103,77 @@ export const getGuestsByInvite = async (req, res) => {
     }
 
     const guests = await Guest.find({ inviteId });
-    res.json(guests);
+
+    res.json({ guests });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// Convidado confirmar presença
+export const getInviteByPin = async (req, res) => {
+  try {
+    const pin = String(req.body.pin).trim(); // força para string
+    const invite = await Invite.findOne({ pin });
+    if (!invite) {
+      return res.status(404).json({ message: "Convite não encontrado." });
+    }
+
+    const guests = await Guest.find({ inviteId: invite._id });
+
+    res.json({ invite, guests });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// Atualiza presença de convidados
+export const updateGuestsConfirmation = async (req, res) => {
+  try {
+    const { inviteId } = req.params;
+    const { guests } = req.body;
+    for (const g of guests) {
+      await Guest.findByIdAndUpdate(g.guestId, {
+        status: g.status,
+        confirmedAt: g.status === "confirmed" ? new Date() : null,
+      });
+    }
+
+    res.json({ message: "Confirmação registrada com sucesso!" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// Atualiza email e telefone de um convite pelo convidado
+export const updateInviteContact = async (req, res) => {
+  try {
+    const { inviteId } = req.params;
+    const { email, phone } = req.body;
+
+    const invite = await Invite.findById(inviteId);
+    if (!invite) {
+      return res.status(404).json({ message: "Convite não encontrado." });
+    }
+
+    invite.email = email ?? invite.email;
+    invite.phone = phone ?? invite.phone;
+
+    await invite.save();
+    res.json({ message: "Contato atualizado com sucesso!", invite });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+export const getInviteContact = async (req, res) => {
+  try {
+    const { inviteId } = req.params;
+    const invite = await Invite.findById(inviteId);
+    if (!invite)
+      return res.status(404).json({ message: "Convite não encontrado" });
+
+    res.json({ email: invite.email, phone: invite.phone });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
