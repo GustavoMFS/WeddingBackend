@@ -9,6 +9,7 @@ import pixRoutes from "./routes/pix.routes.js";
 import stripeRoutes from "./routes/stripe.routes.js";
 import inviteRoutes from "./routes/invite.routes.js";
 import guestRoutes from "./routes/guest.routes.js";
+import questionRoutes from "./routes/questions.routes.js";
 
 dotenv.config();
 const app = express();
@@ -32,6 +33,7 @@ app.use("/api/links", externalLinkRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/pix", pixRoutes);
 app.use("/api/invites", inviteRoutes);
+app.use("/api/questions", questionRoutes);
 app.use("/api", guestRoutes);
 
 export default app;
