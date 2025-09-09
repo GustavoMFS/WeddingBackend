@@ -15,6 +15,10 @@ const GuestSchema = new mongoose.Schema(
       enum: ["pending", "confirmed", "declined"],
       default: "pending",
     },
+    confirmedAt: {
+      type: Date,
+      default: null,
+    },
   },
   { timestamps: true }
 );
