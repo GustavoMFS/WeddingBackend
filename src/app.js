@@ -11,6 +11,7 @@ import inviteRoutes from "./routes/invite.routes.js";
 import guestRoutes from "./routes/guest.routes.js";
 import questionRoutes from "./routes/questions.routes.js";
 import mpcardRoutes from "./routes/mpcard.routes.js";
+import bodyParser from "body-parser";
 
 dotenv.config();
 const app = express();
@@ -26,7 +27,8 @@ app.use(
 
 app.use("/api/stripe", stripeRoutes);
 
-app.use(express.json());
+// app.use(express.json());
+app.use(bodyParser.json({ type: "*/*" }));
 +app.use("/api/auth", authRoutes);
 app.use("/api/gifts", giftRoutes);
 app.use("/api/links", externalLinkRoutes);
