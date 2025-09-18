@@ -127,6 +127,7 @@ export const getInstallments = async (req, res) => {
 };
 
 export const cardPaymentWebhook = async (req, res) => {
+  console.log("Webhook recebido:", req.method, req.url, req.body);
   try {
     const body = req.body;
 
