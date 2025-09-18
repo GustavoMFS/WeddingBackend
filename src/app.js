@@ -10,7 +10,7 @@ import stripeRoutes from "./routes/stripe.routes.js";
 import inviteRoutes from "./routes/invite.routes.js";
 import guestRoutes from "./routes/guest.routes.js";
 import questionRoutes from "./routes/questions.routes.js";
-import mpcardRoutes from "./routes/MPCard.routes.js";
+import mpcardRoutes from "./routes/mpcard.routes.js";
 
 dotenv.config();
 const app = express();
