@@ -127,44 +127,34 @@ export const getInstallments = async (req, res) => {
 };
 
 export const cardPaymentWebhook = async (req, res) => {
+  console.log("Webhook recebido:", req.method, req.url, req.body);
   try {
-    console.log("RAW BODY:", req.body);
+    const body = req.body;
+
+    if (body.type === "payment") {
+      const paymentId = body.data.id;
+
+      const purchase = await GiftPurchase.findOne({ paymentId });
+
+      if (purchase) {
+        purchase.status = "paid";
+        await purchase.save();
+
+        const gift = await Gift.findById(purchase.giftId);
+        if (gift) {
+          gift.amountCollected = (gift.amountCollected || 0) + purchase.value;
+          await gift.save();
+        }
+      } else {
+        console.log(
+          "Pagamento não encontrado, você pode criar registro aqui se quiser"
+        );
+      }
+    }
+
     res.status(200).send("OK");
   } catch (err) {
     console.error("Erro no webhook do cartão:", err);
     res.status(500).send("Erro");
   }
 };
-
-// export const cardPaymentWebhook = async (req, res) => {
-//   console.log("Webhook recebido:", req.method, req.url, req.body);
-//   try {
-//     const body = req.body;
-
-//     if (body.type === "payment") {
-//       const paymentId = body.data.id;
-
-//       const purchase = await GiftPurchase.findOne({ paymentId });
-
-//       if (purchase) {
-//         purchase.status = "paid";
-//         await purchase.save();
-
-//         const gift = await Gift.findById(purchase.giftId);
-//         if (gift) {
-//           gift.amountCollected = (gift.amountCollected || 0) + purchase.value;
-//           await gift.save();
-//         }
-//       } else {
-//         console.log(
-//           "Pagamento não encontrado, você pode criar registro aqui se quiser"
-//         );
-//       }
-//     }
-
-//     res.status(200).send("OK");
-//   } catch (err) {
-//     console.error("Erro no webhook do cartão:", err);
-//     res.status(500).send("Erro");
-//   }
-// };
