@@ -27,7 +27,7 @@ app.use(
 app.use("/api/stripe", stripeRoutes);
 
 app.use(express.json());
-+app.use("/api/auth", authRoutes);
+app.use("/api/auth", authRoutes);
 app.use("/api/gifts", giftRoutes);
 app.use("/api/links", externalLinkRoutes);
 app.use("/api/admin", adminRoutes);
