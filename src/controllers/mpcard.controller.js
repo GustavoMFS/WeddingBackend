@@ -20,11 +20,10 @@ export const createCardPayment = async (req, res) => {
       installments,
       issuer_id,
       payer,
-      name, // <- vem do frontend
-      message, // <- vem do frontend
+      name,
+      message,
     } = req.body;
 
-    // validação
     if (
       !giftId ||
       !transaction_amount ||
@@ -128,33 +127,52 @@ export const getInstallments = async (req, res) => {
 
 export const cardPaymentWebhook = async (req, res) => {
   console.log("Webhook recebido:", req.method, req.url, req.body);
+
   try {
-    const body = req.body;
+    const { type, action, data } = req.body;
 
-    if (body.type === "payment") {
-      const paymentId = body.data.id;
+    if (type === "payment" && data?.id) {
+      const paymentId = data.id;
 
-      const purchase = await GiftPurchase.findOne({ paymentId });
+      const payment = await new Payment(client).get({ id: paymentId });
 
-      if (purchase) {
-        purchase.status = "paid";
+      console.log("Pagamento consultado:", payment);
+
+      let purchase = await GiftPurchase.findOne({ paymentId });
+
+      if (!purchase) {
+        purchase = await GiftPurchase.create({
+          giftId: null,
+          giftTitle: payment.description,
+          name: payment.payer?.first_name || "Desconhecido",
+          message: "",
+          value: payment.transaction_amount,
+          email: payment.payer?.email,
+          payerName: `${payment.payer?.first_name || ""} ${
+            payment.payer?.last_name || ""
+          }`.trim(),
+          payerId: payment.payer?.identification?.number,
+          paymentId: payment.id,
+          status: payment.status,
+        });
+      } else {
+        purchase.status = payment.status;
         await purchase.save();
+      }
 
+      if (purchase.giftId) {
         const gift = await Gift.findById(purchase.giftId);
         if (gift) {
           gift.amountCollected = (gift.amountCollected || 0) + purchase.value;
           await gift.save();
         }
-      } else {
-        console.log(
-          "Pagamento não encontrado, você pode criar registro aqui se quiser"
-        );
       }
     }
 
     res.status(200).send("OK");
   } catch (err) {
     console.error("Erro no webhook do cartão:", err);
-    res.status(500).send("Erro");
+
+    res.status(200).send("OK");
   }
 };
