@@ -9,10 +9,6 @@ const router = express.Router();
 
 router.post("/create-preference", verifyUser, createCheckoutPreference);
 
-router.post(
-  "/webhook",
-  express.raw({ type: "application/json" }),
-  mercadoPagoWebhook
-);
+router.post("/webhook", express.json(), mercadoPagoWebhook);
 
 export default router;

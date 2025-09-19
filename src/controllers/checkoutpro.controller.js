@@ -30,10 +30,7 @@ export const createCheckoutPreference = async (req, res) => {
             unit_price: Number(value),
           },
         ],
-        payer: {
-          name,
-          email: "comprador@email.com",
-        },
+        payer: { name, email: "comprador@email.com" },
         payment_methods: {
           installments: 12,
           excluded_payment_types: [{ id: "ticket" }, { id: "pix" }],
@@ -44,12 +41,8 @@ export const createCheckoutPreference = async (req, res) => {
           pending: `${process.env.FRONTEND_URL}/presentes/pending`,
         },
         auto_return: "approved",
-        metadata: {
-          giftId: gift._id.toString(),
-          name,
-          message,
-          value,
-        },
+        external_reference: gift._id.toString(),
+        metadata: { giftId: gift._id.toString(), name, message, value },
       },
     });
 
@@ -64,19 +57,24 @@ export const createCheckoutPreference = async (req, res) => {
 
 export const mercadoPagoWebhook = async (req, res) => {
   try {
-    const event = req.body;
+    const body = req.body;
+    console.log("Webhook Mercado Pago recebido:", body);
 
-    if (event.type === "payment" && event.data?.id) {
-      const paymentId = event.data.id;
+    if (body.type === "payment" && body.data?.id) {
+      const paymentId = body.data.id;
 
       const payment = await new Payment(client).get({ id: paymentId });
+      console.log("Pagamento encontrado:", payment);
 
       if (payment.status === "approved") {
-        const metadata = payment.metadata || {};
-        const giftId = metadata.giftId;
-        const name = metadata.name || payment.payer?.first_name || "Convidado";
-        const message = metadata.message || "Presente via Checkout Pro";
-        const value = Number(metadata.value || payment.transaction_amount);
+        const giftId = payment.external_reference || payment.metadata?.giftId;
+        const name =
+          payment.metadata?.name || payment.payer?.first_name || "Convidado";
+        const message =
+          payment.metadata?.message || "Presente via Checkout Pro";
+        const value = Number(
+          payment.metadata?.value || payment.transaction_amount
+        );
 
         const gift = await Gift.findById(giftId);
         if (gift) {
@@ -101,9 +99,9 @@ export const mercadoPagoWebhook = async (req, res) => {
       }
     }
 
-    res.status(200).json({ received: true });
+    res.sendStatus(200);
   } catch (err) {
     console.error("Erro no webhook Mercado Pago:", err);
-    res.status(500).json({ error: "Erro no webhook Mercado Pago" });
+    res.sendStatus(500);
   }
 };
