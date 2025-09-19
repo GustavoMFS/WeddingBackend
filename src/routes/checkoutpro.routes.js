@@ -2,7 +2,7 @@ import express from "express";
 import {
   createCheckoutPreference,
   mercadoPagoWebhook,
-} from "../controllers/mercadopago.controller.js";
+} from "../controllers/checkoutpro.controller.js";
 import { verifyUser } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
