@@ -11,13 +11,14 @@ import { verifyAdmin } from "../middlewares/adminAuth.middleware.js";
 
 const router = express.Router();
 
-// Convidados
-router.get("/", verifyUser, getAllExternalLinks);
+// Admin Routes
+router.post("/admin", verifyAdmin, createExternalLink);
+router.get("/admin", verifyAdmin, getAllExternalLinks);
+router.get("/admin/:id", verifyAdmin, getExternalLinkById);
+router.put("/admin/:id", verifyAdmin, updateExternalLink);
+router.delete("/admin/:id", verifyAdmin, deleteExternalLink);
 
-// Noivos (admin)
-router.post("/", verifyAdmin, createExternalLink);
-router.get("/:id", verifyAdmin, getExternalLinkById);
-router.put("/:id", verifyAdmin, updateExternalLink);
-router.delete("/:id", verifyAdmin, deleteExternalLink);
+// Guest Routes
+router.get("/", verifyUser, getAllExternalLinks);
 
 export default router;
