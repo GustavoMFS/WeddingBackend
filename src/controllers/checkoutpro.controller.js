@@ -3,7 +3,7 @@ import Gift from "../models/Gift.js";
 import GiftPurchase from "../models/GiftPurchase.js";
 
 const client = new MercadoPagoConfig({
-  accessToken: process.env.MERCADO_PAGO_ACCESS_TOKEN,
+  accessToken: process.env.MERCADO_PAGO_CHECKOUT_PRO,
 });
 
 export const createCheckoutPreference = async (req, res) => {
