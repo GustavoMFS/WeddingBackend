@@ -1,8 +1,6 @@
 import Invite from "../models/Invite.js";
 import Guest from "../models/Guest.js";
-
-// Gera PIN de 4 dígitos
-const generatePin = () => Math.floor(1000 + Math.random() * 9000).toString();
+import { generateUniquePin } from "../utils/generatePin.js";
 
 // Criar novo convite
 export const createInvite = async (req, res) => {
@@ -13,13 +11,18 @@ export const createInvite = async (req, res) => {
       return res.status(400).json({ message: "Identifier já existe." });
     }
 
-    const pin = generatePin();
+    const pin = await generateUniquePin();
 
     const invite = new Invite({ identifier, email, phone, pin });
     await invite.save();
 
     res.status(201).json(invite);
   } catch (err) {
+    if (err.code === 11000 && err.keyPattern?.pin) {
+      return res.status(500).json({
+        message: "PIN duplicado gerado simultaneamente. Tente novamente.",
+      });
+    }
     res.status(500).json({ message: err.message });
   }
 };

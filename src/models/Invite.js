@@ -12,6 +12,6 @@ const InviteSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-InviteSchema.index({ identifier: 1, pin: 1 }, { unique: true });
+InviteSchema.index({ pin: 1 }, { unique: true });
 
 export default mongoose.model("Invite", InviteSchema);
